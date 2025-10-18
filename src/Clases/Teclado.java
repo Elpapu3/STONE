@@ -2,54 +2,48 @@ package Clases;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.ArrayList;
-import java.awt.Rectangle;
-import javax.swing.JPanel;
 
 public class Teclado extends KeyAdapter {
-
     private Jugador jugador;
-    private int anchoVentana, altoVentana;
-    private ArrayList<Rectangle> muros;
-    private JPanel panel; // 🔹 referencia al panel para hacer repaint()
+    private NivleBomb nivelBomb;
+    private NivelDino nivelDino;
+    private final int PASO = 10;
 
-    public Teclado(Jugador jugador, int anchoVentana, int altoVentana, ArrayList<Rectangle> muros, JPanel panel) {
+    public Teclado(Jugador jugador, NivleBomb nivel) {
         this.jugador = jugador;
-        this.anchoVentana = anchoVentana;
-        this.altoVentana = altoVentana;
-        this.muros = muros;
-        this.panel = panel;
+        this.nivelBomb = nivel;
+    }
+
+    public Teclado(Jugador jugador, NivelDino nivel) {
+        this.jugador = jugador;
+        this.nivelDino = nivel;
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
-        int paso = 10;
+        if (!jugador.estaVivo()) return;
 
-        // 🔹 Mensaje general para ver si las teclas funcionan
-        System.out.println("Tecla presionada: " + KeyEvent.getKeyText(e.getKeyCode()));
+        int key = e.getKeyCode();
 
-        switch (e.getKeyCode()) {
-            case KeyEvent.VK_LEFT -> {
-                jugador.mover(-paso, 0, muros, anchoVentana, altoVentana);
-                System.out.println("← Movimiento a la izquierda");
-            }
-            case KeyEvent.VK_RIGHT -> {
-                jugador.mover(paso, 0, muros, anchoVentana, altoVentana);
-                System.out.println("→ Movimiento a la derecha");
-            }
-            case KeyEvent.VK_UP -> {
-                jugador.mover(0, -paso, muros, anchoVentana, altoVentana);
-                System.out.println("↑ Movimiento hacia arriba");
-            }
-            case KeyEvent.VK_DOWN -> {
-                jugador.mover(0, paso, muros, anchoVentana, altoVentana);
-                System.out.println("↓ Movimiento hacia abajo");
-            }
-            default -> {
-                System.out.println("Otra tecla presionada");
+        if (nivelBomb != null) {
+            switch (key) {
+                case KeyEvent.VK_W -> jugador.mover(0, -PASO, nivelBomb.getTodosMuros());
+                case KeyEvent.VK_S -> jugador.mover(0, PASO, nivelBomb.getTodosMuros());
+                case KeyEvent.VK_A -> jugador.mover(-PASO, 0, nivelBomb.getTodosMuros());
+                case KeyEvent.VK_D -> jugador.mover(PASO, 0, nivelBomb.getTodosMuros());
+                case KeyEvent.VK_SPACE -> nivelBomb.colocarBomba(jugador.getX(), jugador.getY());
             }
         }
 
-        panel.repaint(); // 🔹 actualizar dibujo
+        if (nivelDino != null) {
+            if (key == KeyEvent.VK_SPACE && !nivelDino.isSaltando()) {
+                nivelDino.setSaltando(true);
+            }
+        }
+
+        if (key == KeyEvent.VK_P) {
+            System.out.println("Cambio de nivel");
+           
+        }
     }
 }
